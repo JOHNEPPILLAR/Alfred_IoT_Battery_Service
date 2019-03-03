@@ -1,0 +1,31 @@
+{
+  "name": "alfred_iot_battery_service",
+  "version": "1.0.0",
+  "description": "Alfred IoT Battery Service",
+  "main": "lib/server.js",
+  "scripts": {
+    "start": "node lib/server.js | pino-elasticsearch -i alfred -H alfred_elk_elasticsearch_1 -l info",
+    "dev": "nodemon lib/server.js"
+  },
+  "author": "JP",
+  "dependencies": {
+    "apn": "latest",
+    "dotenv": "latest",
+    "fs": "latest",
+    "os": "latest",
+    "pg": "latest",
+    "pure-uuid": "latest",
+    "request": "latest",
+    "request-promise": "latest",
+    "restify": "latest",
+    "restify-router": "latest",
+    "pino": "latest",
+    "pino-pretty": "latest",
+    "node-schedule": "latest"
+  },
+  "devDependencies": {
+    "eslint": "latest",
+    "eslint-config-airbnb-base": "latest",
+    "eslint-plugin-import": "latest"
+  }
+}
