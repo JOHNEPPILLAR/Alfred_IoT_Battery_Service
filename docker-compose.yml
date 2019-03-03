@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
 
-  alfred_scheduler_service:
+  alfred_iot_battery_service:
     build: .
     image: alfred_iot_battery_service:latest
     container_name: alfred_iot_battery_service
