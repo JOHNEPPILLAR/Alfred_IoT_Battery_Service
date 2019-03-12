@@ -65,7 +65,7 @@ async function processData(message) {
  */
 exports.getData = async () => {
   try {
-    const minBatteryLevel = 30;
+    const minBatteryLevel = 10;
 
     const SQL = 'SELECT battery, location, device FROM vw_battery_data';
     serviceHelper.log('trace', 'battery - getData', 'Connect to data store connection pool');
