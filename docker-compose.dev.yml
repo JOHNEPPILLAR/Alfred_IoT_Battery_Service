@@ -1,0 +1,23 @@
+version: '3.5'
+
+services:
+
+  alfred_iot_battery_service:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    image: alfred_iot_battery_service:latest
+    container_name: alfred_iot_battery_service
+    restart: always
+    hostname: alfred_iot_battery_service
+    networks:
+      - alfred
+    ports:
+      - "3978:3978"
+    command: npm run dev
+    
+networks:
+
+  alfred:
+    name: alfred
+    driver: bridge

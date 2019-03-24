@@ -2,7 +2,7 @@ FROM node:11-alpine
 
 RUN ln -snf /usr/share/zoneinfo/Europe/London /etc/localtime && echo Europe/London > /etc/timezone \
   && mkdir -p /home/nodejs/app \
-  && apk --no-cache --virtual build-dependencies add \
+	&& apk --no-cache --virtual build-dependencies add \
 	g++ \
 	gcc \
 	libgcc \
@@ -12,18 +12,13 @@ RUN ln -snf /usr/share/zoneinfo/Europe/London /etc/localtime && echo Europe/Lond
 	python \
   && npm install --quiet node-gyp -g \
   && rm -rf /var/cache/apk/*
-
+	
 WORKDIR /home/nodejs/app
 
 COPY . /home/nodejs/app
 
 RUN rm -rf node_modules \
-  && npm install --production \
-	&& npm install pino-elasticsearch -g
-
-HEALTHCHECK --interval=12s --timeout=12s --start-period=30s \  
- CMD node lib/healthcheck.js
-
-CMD [ "npm", "start" ]
+		&& npm install nodemon \
+		&& npm install
 
 EXPOSE 3978
