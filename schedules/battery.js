@@ -15,9 +15,9 @@ async function sendPushNotification(apnProvider, user, message) {
   notification.alert = message;
   const result = await apnProvider.send(notification, user.device_token);
   if (result.sent.length === 1) {
-    serviceHelper.log('info', 'sendPushNotification', `Battery push notification sent to: ${user.device_token}`);
+    serviceHelper.log('info', `Battery push notification sent to: ${user.device_token}`);
   } else {
-    serviceHelper.log('error', 'sendPushNotification', `Battery push notification failed to send: ${result.failed[0].response.reason}, for device: ${user.device_token}`);
+    serviceHelper.log('error', `Battery push notification failed to send: ${result.failed[0].response.reason}, for device: ${user.device_token}`);
   }
   return true;
 }
@@ -29,20 +29,20 @@ async function processData(message) {
   // Get the list of devices to push notifiactions to
   const SQL = 'SELECT last(device_token, time) as device_token, app_user FROM ios_devices WHERE app_user is not null GROUP BY app_user';
   try {
-    serviceHelper.log('trace', 'processData', 'Connect to data store connection pool');
+    serviceHelper.log('trace', 'Connect to data store connection pool');
     dbClient = await global.deviceDataClient.connect(); // Connect to data store
-    serviceHelper.log('trace', 'processData', 'Getting IOS devices');
+    serviceHelper.log('trace', 'Getting IOS devices');
     results = await dbClient.query(SQL);
-    serviceHelper.log('trace', 'processData', 'Release the data store connection back to the pool');
+    serviceHelper.log('trace', 'Release the data store connection back to the pool');
     await dbClient.release(); // Return data store connection back to pool
 
     if (results.rowCount === 0) {
-      serviceHelper.log('warn', 'processData', 'No devices registered to send push notifications to');
+      serviceHelper.log('warn', 'No devices registered to send push notifications to');
       return false;
     } // Exit function as no data to process
 
     // Connect to apples push notification service
-    serviceHelper.log('trace', 'processData', 'Connect to Apple push notification service');
+    serviceHelper.log('trace', 'Connect to Apple push notification service');
     const apnProvider = new apn.Provider({
       cert: './certs/push.pem',
       key: './certs/push_key.pem',
@@ -51,10 +51,10 @@ async function processData(message) {
 
     // Send notifications
     await Promise.all(results.rows.map(user => sendPushNotification(apnProvider, user, message)));
-    serviceHelper.log('trace', 'processData', 'Close down connection to push notification service');
+    serviceHelper.log('trace', 'Close down connection to push notification service');
     await apnProvider.shutdown(); // Close the connection with apn
   } catch (err) {
-    serviceHelper.log('error', 'processData', err.message);
+    serviceHelper.log('error', err.message);
     return false;
   }
   return true;
@@ -68,11 +68,11 @@ exports.getData = async () => {
     const minBatteryLevel = 10;
 
     const SQL = 'SELECT battery, location, device FROM vw_battery_data';
-    serviceHelper.log('trace', 'battery - getData', 'Connect to data store connection pool');
+    serviceHelper.log('trace', 'Connect to data store connection pool');
     const dbClient = await global.deviceDataClient.connect(); // Connect to data store
-    serviceHelper.log('trace', 'battery - getData', 'Get battery data from data store');
+    serviceHelper.log('trace', 'Get battery data from data store');
     const results = await dbClient.query(SQL);
-    serviceHelper.log('trace', 'battery - getData', 'Release the data store connection back to the pool');
+    serviceHelper.log('trace', 'Release the data store connection back to the pool');
     await dbClient.release(); // Return data store connection back to pool
 
     // Get link-tap data
@@ -84,7 +84,7 @@ exports.getData = async () => {
     const linkTapData = await serviceHelper.callAPIServicePut(url, body);
 
     if (linkTapData instanceof Error) {
-      serviceHelper.log('error', 'getData', 'LinkTap: Unable to get LinkTap data');
+      serviceHelper.log('error', 'LinkTap: Unable to get LinkTap data');
     } else {
       let batteryLevel = linkTapData.devices[0].taplinker[0].batteryStatus;
       batteryLevel = Number(batteryLevel.slice(0, -1));
@@ -93,12 +93,12 @@ exports.getData = async () => {
     }
 
     if (results.rowCount === 0) {
-      serviceHelper.log('warn', 'battery - getData', 'No battery data in the last hour');
+      serviceHelper.log('warn', 'No battery data in the last hour');
       processData('No 🔋data in the last hour');
       return;
     }
     // Filter out ok battery readings
-    serviceHelper.log('trace', 'battery - getData', 'Filtering out ok battery readings');
+    serviceHelper.log('trace', 'Filtering out ok battery readings');
     const lowBattery = results.rows.filter(rec => rec.battery < minBatteryLevel);
 
     let message = '🔋 levels low:\r\n';
@@ -108,9 +108,9 @@ exports.getData = async () => {
     if (lowBattery.length > 0) {
       processData(message);
     } else {
-      serviceHelper.log('trace', 'battery - getData', 'Battery levels ok');
+      serviceHelper.log('trace', 'Battery levels ok');
     }
   } catch (err) {
-    serviceHelper.log('error', 'battery - getData', err.message);
+    serviceHelper.log('error', err.message);
   }
 };

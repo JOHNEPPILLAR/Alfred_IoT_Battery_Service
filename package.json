@@ -21,7 +21,8 @@
     "restify-router": "latest",
     "pino": "latest",
     "pino-pretty": "latest",
-    "node-schedule": "latest"
+    "node-schedule": "latest",
+    "path": "latest"
   },
   "devDependencies": {
     "eslint": "latest",

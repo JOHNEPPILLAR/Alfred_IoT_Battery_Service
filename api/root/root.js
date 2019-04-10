@@ -29,7 +29,7 @@ const skill = new Skills();
  *
  */
 function ping(req, res, next) {
-  serviceHelper.log('trace', 'ping', 'Ping API called');
+  serviceHelper.log('trace', 'Ping API called');
 
   const ackJSON = {
     service: process.env.ServiceName,

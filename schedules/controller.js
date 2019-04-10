@@ -14,5 +14,5 @@ exports.collectData = async function FnCollectData() {
   rule.hour = 18;
   rule.minute = 0;
   schedule.scheduleJob(rule, (() => { batteryCheck.getData(); })); // Set the timer
-  serviceHelper.log('info', 'collectData', `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(rule.minute, 2)}`);
+  serviceHelper.log('info', `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(rule.minute, 2)}`);
 };
