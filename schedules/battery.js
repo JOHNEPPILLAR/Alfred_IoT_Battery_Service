@@ -9,17 +9,23 @@ const apn = require('apn');
 const serviceHelper = require('../lib/helper.js');
 
 async function sendPushNotification(apnProvider, user, message) {
-  const notification = new apn.Notification();
-  notification.topic = 'JP.Alfred-IOS';
-  notification.expiry = Math.floor(Date.now() / 1000) + 600; // Expires 10 minutes from now.
-  notification.alert = message;
-  const result = await apnProvider.send(notification, user.device_token);
-  if (result.sent.length === 1) {
-    serviceHelper.log('info', `Battery push notification sent to: ${user.device_token}`);
-  } else {
-    serviceHelper.log('error', `Battery push notification failed to send: ${result.failed[0].response.reason}, for device: ${user.device_token}`);
+  try {
+    const notification = new apn.Notification();
+    notification.topic = 'JP.Alfred-IOS';
+    notification.expiry = Math.floor(Date.now() / 1000) + 600; // Expires 10 minutes from now.
+    notification.alert = message;
+    const result = await apnProvider.send(notification, user.device_token);
+
+    if (result.sent.length === 1) {
+      serviceHelper.log('info', `Battery push notification sent to: ${user.device_token}`);
+    } else {
+      serviceHelper.log('error', `Battery push notification failed to send: ${result.failed[0].response.reason}, for device: ${user.device_token}`);
+    }
+    return true;
+  } catch (err) {
+    serviceHelper.log('error', err.message);
+    return false;
   }
-  return true;
 }
 
 async function processData(message) {
@@ -44,8 +50,11 @@ async function processData(message) {
     // Connect to apples push notification service
     serviceHelper.log('trace', 'Connect to Apple push notification service');
     const apnProvider = new apn.Provider({
-      cert: './certs/push.pem',
-      key: './certs/push_key.pem',
+      token: {
+        key: 'certs/Push.p8',
+        keyId: process.env.keyID,
+        teamId: process.env.teamID,
+      },
       production: true,
     });
 
