@@ -14,5 +14,5 @@ services:
 networks:
 
   alfred:
-    name: alfred
+    name: nat
     driver: nat
