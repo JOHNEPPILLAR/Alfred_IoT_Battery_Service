@@ -8,4 +8,11 @@ services:
     container_name: alfred_iot_battery_service
     restart: always
     hostname: alfred_iot_battery_service
-    network_mode: nat
+    networks:
+      - alfred 
+    
+networks:
+
+  alfred:
+    name: alfred
+    driver: nat
