@@ -19,7 +19,12 @@ async function sendPushNotification(apnProvider, user, message) {
     if (result.sent.length === 1) {
       serviceHelper.log('info', `Battery push notification sent to: ${user.device_token}`);
     } else {
-      serviceHelper.log('error', `Battery push notification failed to send: ${result.failed[0].response.reason}, for device: ${user.device_token}`);
+      serviceHelper.log(
+        'error',
+        `Battery push notification failed to send: ${
+          result.failed[0].response.reason
+        }, for device: ${user.device_token}`,
+      );
     }
     return true;
   } catch (err) {
