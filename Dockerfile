@@ -1,4 +1,4 @@
-FROM node:11-alpine
+FROM node:12-alpine
 
 RUN ln -snf /usr/share/zoneinfo/Europe/London /etc/localtime && echo Europe/London > /etc/timezone \
   && mkdir -p /home/nodejs/app \
@@ -17,12 +17,11 @@ WORKDIR /home/nodejs/app
 
 COPY . /home/nodejs/app
 
-RUN rm -rf node_modules \
-  && npm install --production \
+RUN npm update \
+	&& npm install --production \
 	&& npm install pino-elasticsearch -g
-
-#HEALTHCHECK --interval=12s --timeout=24s --start-period=60s \  
-# CMD node lib/healthcheck.js
+	
+HEALTHCHECK --start-period=60s --interval=10s --timeout=10s --retries=6 CMD ["./healthcheck.sh"]
 
 CMD [ "npm", "start" ]
 

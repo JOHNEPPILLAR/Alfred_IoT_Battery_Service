@@ -1,4 +1,4 @@
-FROM node:11-alpine
+FROM node:12-alpine
 
 RUN ln -snf /usr/share/zoneinfo/Europe/London /etc/localtime && echo Europe/London > /etc/timezone \
   && mkdir -p /home/nodejs/app \
@@ -17,8 +17,9 @@ WORKDIR /home/nodejs/app
 
 COPY . /home/nodejs/app
 
-RUN rm -rf node_modules \
-		&& npm install nodemon \
+RUN npm install nodemon \
 		&& npm install
+
+HEALTHCHECK --start-period=60s --interval=10s --timeout=10s --retries=6 CMD ["./healthcheck.sh"]
 
 EXPOSE 3978
