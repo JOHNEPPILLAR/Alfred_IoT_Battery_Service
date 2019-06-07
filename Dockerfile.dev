@@ -17,6 +17,9 @@ WORKDIR /home/nodejs/app
 
 COPY . /home/nodejs/app
 
+RUN mv certs/alfred_iot_battery_service-key.pem certs/server.key \
+  && mv certs/alfred_iot_battery_service.pem certs/server.crt 
+
 RUN npm install nodemon \
 		&& npm install
 
