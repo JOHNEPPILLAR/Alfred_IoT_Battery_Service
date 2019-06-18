@@ -1,7 +1,6 @@
 version: '3.5'
 
 services:
-
   alfred_iot_battery_service:
     build: .
     image: alfred_iot_battery_service:latest
@@ -9,10 +8,10 @@ services:
     restart: always
     hostname: alfred_iot_battery_service
     networks:
-      - alfred 
-    
-networks:
+      - alfred
+    command: npm run prod
 
+networks:
   alfred:
     name: nat
     driver: nat

@@ -1,7 +1,6 @@
 version: '3.5'
 
 services:
-
   alfred_iot_battery_service:
     build:
       context: ./
@@ -13,11 +12,10 @@ services:
     networks:
       - alfred
     ports:
-      - "3978:3978"
-    command: npm run dev
-    
-networks:
+      - '3978:3978'
+    command: npm run test
 
+networks:
   alfred:
     name: alfred
     driver: bridge
