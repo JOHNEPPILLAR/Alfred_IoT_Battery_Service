@@ -3,6 +3,7 @@ FROM node:12-alpine
 RUN ln -snf /usr/share/zoneinfo/Europe/London /etc/localtime && echo Europe/London > /etc/timezone \
 	&& mkdir -p /home/nodejs/app \
 	&& apk --no-cache --virtual build-dependencies add \
+	git \ 
 	g++ \
 	gcc \
 	libgcc \
