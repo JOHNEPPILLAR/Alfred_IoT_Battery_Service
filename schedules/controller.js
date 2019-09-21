@@ -2,11 +2,11 @@
  * Import external libraries
  */
 const schedule = require('node-schedule');
+const serviceHelper = require('alfred_helper');
 
 /**
  * Import helper libraries
  */
-const serviceHelper = require('../lib/helper.js');
 const batteryCheck = require('./battery.js');
 
 exports.collectData = async function FnCollectData() {
@@ -20,7 +20,10 @@ exports.collectData = async function FnCollectData() {
   }); // Set the timer
   serviceHelper.log(
     'info',
-    `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(rule.minute, 2)}`,
+    `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(
+      rule.minute,
+      2,
+    )}`,
   );
 
   // Set second schedule
@@ -32,6 +35,9 @@ exports.collectData = async function FnCollectData() {
   }); // Set the timer
   serviceHelper.log(
     'info',
-    `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(rule.minute, 2)}`,
+    `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(
+      rule.minute,
+      2,
+    )}`,
   );
 };

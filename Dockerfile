@@ -21,8 +21,7 @@ RUN mv certs/alfred_iot_battery_service-key.pem certs/server.key \
 	&& mv certs/alfred_iot_battery_service.pem certs/server.crt 
 
 RUN npm update \
-	&& npm install --production \
-	&& npm install pino-elasticsearch -g
+	&& npm install --production 
 
 HEALTHCHECK --start-period=60s --interval=10s --timeout=10s --retries=6 CMD ["./healthcheck.sh"]
 
