@@ -2,7 +2,7 @@
  * Import external libraries
  */
 const schedule = require('node-schedule');
-const serviceHelper = require('alfred_helper');
+const serviceHelper = require('alfred-helper');
 
 /**
  * Import helper libraries

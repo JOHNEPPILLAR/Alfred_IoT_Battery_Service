@@ -7,7 +7,8 @@ const restify = require('restify');
 const fs = require('fs');
 const UUID = require('pure-uuid');
 const { Pool } = require('pg');
-const serviceHelper = require('alfred_helper');
+const serviceHelper = require('alfred-helper');
+const { version } = require('../../package.json');
 
 /**
  * Import helper libraries
@@ -23,16 +24,12 @@ global.deviceDataClient = new Pool({
   port: 5432,
 });
 
-global.instanceTraceID = new UUID(4);
-global.callTraceID = null;
-global.timers = [];
-global.lightNames = [];
-global.lightGroupNames = [];
+global.APITraceID = '';
 
 // Restify server Init
 const server = restify.createServer({
   name: process.env.ServiceName,
-  version: process.env.Version,
+  version,
   key: fs.readFileSync('./certs/server.key'),
   certificate: fs.readFileSync('./certs/server.crt'),
 });
@@ -62,9 +59,11 @@ server.use((req, res, next) => {
 });
 server.use((req, res, next) => {
   // Check for a trace id
-  if (typeof req.headers['trace-id'] === 'undefined') {
-    global.callTraceID = new UUID(4);
-  } // Generate new trace id
+  if (typeof req.headers['api-trace-id'] === 'undefined') {
+    global.APITraceID = new UUID(4);
+  } else {
+    global.APITraceID = req.headers['api-trace-id'];
+  }
 
   // Check for valid auth key
   if (req.headers['client-access-key'] !== process.env.ClientAccessKey) {
@@ -103,13 +102,17 @@ async function cleanExit() {
   serviceHelper.log('warn', 'Service stopping');
   serviceHelper.log('warn', 'Closing the data store pools');
   try {
-    await global.deviceDataClient.end();
+    await global.deviceDataClient
+      .end()
+      .then(() => serviceHelper.log('trace', 'client has disconnected'))
+      .catch((err) => serviceHelper.log('error', err.stack));
   } catch (err) {
     serviceHelper.log('warn', 'Failed to close the data store connection');
   }
   serviceHelper.log('warn', 'Close rest server');
   server.close(() => {
     // Ensure rest server is stopped
+    serviceHelper.log('warn', 'Exit the app');
     process.exit(); // Exit app
   });
 }

@@ -2,7 +2,7 @@
  * Import external libraries
  */
 const apn = require('apn');
-const serviceHelper = require('alfred_helper');
+const serviceHelper = require('alfred-helper');
 
 async function sendPushNotification(apnProvider, user, message) {
   try {
@@ -35,8 +35,7 @@ async function processData(message) {
   let dbClient;
 
   // Get the list of devices to push notifiactions to
-  const SQL =
-    'SELECT last(device_token, time) as device_token, app_user FROM ios_devices WHERE app_user is not null GROUP BY app_user';
+  const SQL = 'SELECT last(device_token, time) as device_token, app_user FROM ios_devices WHERE app_user is not null GROUP BY app_user';
   try {
     serviceHelper.log('trace', 'Connect to data store connection pool');
     dbClient = await global.deviceDataClient.connect(); // Connect to data store
@@ -69,9 +68,7 @@ async function processData(message) {
 
     // Send notifications
     await Promise.all(
-      results.rows.map((user) =>
-        sendPushNotification(apnProvider, user, message),
-      ),
+      results.rows.map((user) => sendPushNotification(apnProvider, user, message)),
     );
     serviceHelper.log(
       'trace',
@@ -135,7 +132,7 @@ exports.getData = async () => {
       (rec) => rec.battery < minBatteryLevel,
     );
 
-    let message = '🔋 levels low:\r\n';
+    let message = '🔋levels low:\r\n';
     lowBattery.forEach((device) => {
       message = `${message}${device.device} - ${device.location} (${device.battery}%)\r\n`;
     });
