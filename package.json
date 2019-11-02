@@ -32,6 +32,6 @@
     "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "snyk": "^1.239.0"
+    "snyk": "^1.241.0"
   }
 }
