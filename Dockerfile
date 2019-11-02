@@ -18,8 +18,8 @@ WORKDIR /home/nodejs/app
 
 COPY . /home/nodejs/app
 
-RUN mv certs/alfred_iot_battery_service-key.pem certs/server.key \
-	&& mv certs/alfred_iot_battery_service.pem certs/server.crt 
+RUN mv certs/alfred_iot_battery_service.key certs/server.key \
+	&& mv certs/alfred_iot_battery_service.crt certs/server.crt 
 
 RUN npm update \
 	&& npm install --production 
