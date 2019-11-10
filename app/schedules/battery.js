@@ -89,6 +89,7 @@ exports.getData = async () => {
   try {
     const minBatteryLevel = 15;
 
+    // Flower Care & Netatmo devices
     const SQL = 'SELECT battery, location, device FROM vw_battery_data';
     serviceHelper.log('trace', 'Connect to data store connection pool');
     const dbClient = await global.deviceDataClient.connect(); // Connect to data store
@@ -100,7 +101,7 @@ exports.getData = async () => {
     );
     await dbClient.release(); // Return data store connection back to pool
 
-    // Get link-tap data
+    // Link-tap device
     const url = 'https://www.link-tap.com/api/getAllDevices';
     const body = {
       username: process.env.LinkTapUser,
