@@ -11,7 +11,6 @@ async function sendPushNotification(apnProvider, user, message) {
     notification.expiry = Math.floor(Date.now() / 1000) + 600; // Expires 10 minutes from now.
     notification.alert = message;
     const result = await apnProvider.send(notification, user.device_token);
-
     if (result.sent.length === 1) {
       serviceHelper.log(
         'info',
@@ -32,13 +31,13 @@ async function sendPushNotification(apnProvider, user, message) {
 
 async function processData(message) {
   let results;
-  let dbClient;
 
   // Get the list of devices to push notifiactions to
-  const SQL = 'SELECT last(device_token, time) as device_token, app_user FROM ios_devices WHERE app_user is not null GROUP BY app_user';
+  const SQL = 'SELECT last(device_token, time) as device_token FROM ios_devices';
   try {
     serviceHelper.log('trace', 'Connect to data store connection pool');
-    dbClient = await global.deviceDataClient.connect(); // Connect to data store
+    const dbConnection = await serviceHelper.connectToDB('devices');
+    const dbClient = await dbConnection.connect(); // Connect to data store
     serviceHelper.log('trace', 'Getting IOS devices');
     results = await dbClient.query(SQL);
     serviceHelper.log(
@@ -46,6 +45,7 @@ async function processData(message) {
       'Release the data store connection back to the pool',
     );
     await dbClient.release(); // Return data store connection back to pool
+    await dbClient.end(); // Close data store connection
 
     if (results.rowCount === 0) {
       serviceHelper.log(
@@ -57,11 +57,20 @@ async function processData(message) {
 
     // Connect to apples push notification service
     serviceHelper.log('trace', 'Connect to Apple push notification service');
+    const IOSNotificationKeyID = await serviceHelper.vaultSecret(process.env.ENVIRONMENT, 'IOSNotificationKeyID');
+    const IOSNotificationTeamID = await serviceHelper.vaultSecret(process.env.ENVIRONMENT, 'IOSNotificationTeamID');
+    const IOSPushKey = await serviceHelper.vaultSecret(process.env.ENVIRONMENT, 'IOSPushKey');
+    if (IOSNotificationKeyID instanceof Error
+      || IOSNotificationTeamID instanceof Error
+      || IOSPushKey instanceof Error) {
+      serviceHelper.log('error', 'Not able to get secret (CERTS) from vault');
+      return false;
+    }
     const apnProvider = new apn.Provider({
       token: {
-        key: 'certs/Push.p8',
-        keyId: process.env.keyID,
-        teamId: process.env.teamID,
+        key: IOSPushKey,
+        keyId: IOSNotificationKeyID,
+        teamId: IOSNotificationTeamID,
       },
       production: true,
     });
@@ -90,9 +99,11 @@ exports.getData = async () => {
     const minBatteryLevel = 15;
 
     // Flower Care & Netatmo devices
+    serviceHelper.log('trace', 'Flower Care & Netatmo devices');
     const SQL = 'SELECT battery, location, device FROM vw_battery_data';
     serviceHelper.log('trace', 'Connect to data store connection pool');
-    const dbClient = await global.deviceDataClient.connect(); // Connect to data store
+    const dbConnection = await serviceHelper.connectToDB('devices');
+    const dbClient = await dbConnection.connect(); // Connect to data store
     serviceHelper.log('trace', 'Get battery data from data store');
     const results = await dbClient.query(SQL);
     serviceHelper.log(
@@ -100,15 +111,26 @@ exports.getData = async () => {
       'Release the data store connection back to the pool',
     );
     await dbClient.release(); // Return data store connection back to pool
+    await dbClient.end(); // Close data store connection
+    // If no data create empty rows array
+    if (results.rowCount === 0) {
+      results.rows = [];
+    }
 
     // Link-tap device
+    serviceHelper.log('trace', 'Link-tap device');
     const url = 'https://www.link-tap.com/api/getAllDevices';
+    const LinkTapUser = await serviceHelper.vaultSecret(process.env.ENVIRONMENT, 'LinkTapUser');
+    const LinkTapKey = await serviceHelper.vaultSecret(process.env.ENVIRONMENT, 'LinkTapKey');
+    if (LinkTapUser instanceof Error || LinkTapKey instanceof Error) {
+      serviceHelper.log('error', 'Not able to get secret (Link Tab Info) from vault');
+      return;
+    }
     const body = {
-      username: process.env.LinkTapUser,
-      apiKey: process.env.LinkTapKey,
+      username: LinkTapUser,
+      apiKey: LinkTapKey,
     };
     const linkTapData = await serviceHelper.callAPIServicePut(url, body);
-
     if (linkTapData instanceof Error) {
       serviceHelper.log('error', 'LinkTap: Unable to get LinkTap data');
     } else {
@@ -120,6 +142,7 @@ exports.getData = async () => {
         device: 'LinkTap',
       };
       results.rows.push(linkTapBatteryData);
+      results.rowCount = 1;
     }
 
     if (results.rowCount === 0) {
