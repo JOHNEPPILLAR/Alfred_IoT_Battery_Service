@@ -157,8 +157,9 @@ exports.getData = async () => {
     );
 
     let message = '🔋levels low:\r\n';
-    lowBattery.forEach((device) => {
+    lowBattery.map((device) => {
       message = `${message}${device.device} - ${device.location} (${device.battery}%)\r\n`;
+      return true;
     });
     if (lowBattery.length > 0) {
       processData(message);
