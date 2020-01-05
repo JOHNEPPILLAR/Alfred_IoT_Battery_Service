@@ -15,6 +15,7 @@ const APIroot = require('../api/root/root.js');
 const scheduleController = require('../schedules/controller.js');
 
 global.APITraceID = '';
+global.schedules = [];
 let ClientAccessKey;
 
 async function setupAndRun() {
@@ -126,10 +127,10 @@ async function setupAndRun() {
   // Start service and listen to requests
   server.listen(process.env.PORT, async () => {
     serviceHelper.log('info', `${process.env.VIRTUAL_HOST} has started`);
-    if (process.env.MOCK === 'true' || process.env.Mock === 'lights') {
+    if (process.env.MOCK === 'true') {
       serviceHelper.log('info', 'Mocking enabled, will not setup schedules');
     } else {
-      scheduleController.collectData();
+      scheduleController.setSchedule();
     }
   });
 }

@@ -97,25 +97,37 @@ async function processData(message) {
 exports.getData = async () => {
   try {
     const minBatteryLevel = 15;
+    const results = [];
 
-    // Flower Care & Netatmo devices
-    serviceHelper.log('trace', 'Flower Care & Netatmo devices');
+    // Flower Care battery info
+    serviceHelper.log('trace', 'Flower Care battery info');
     const SQL = 'SELECT battery, location, device FROM vw_battery_data';
     serviceHelper.log('trace', 'Connect to data store connection pool');
-    const dbConnection = await serviceHelper.connectToDB('devices');
-    const dbClient = await dbConnection.connect(); // Connect to data store
+    let dbConnection = await serviceHelper.connectToDB('flowercare');
+    let dbClient = await dbConnection.connect(); // Connect to data store
     serviceHelper.log('trace', 'Get battery data from data store');
-    const results = await dbClient.query(SQL);
+    let tempResults = await dbClient.query(SQL);
+    serviceHelper.log(
+      'trace',
+      'Release the data store connection back to the pool',
+    );
+    await dbClient.release(); // Return data store connection back to pool
+    if (tempResults.rowCount !== 0) results.push(tempResults.rows);
+
+    // Netatmo battery info
+    serviceHelper.log('trace', 'Netatmo battery info');
+    serviceHelper.log('trace', 'Connect to data store connection pool');
+    dbConnection = await serviceHelper.connectToDB('netatmo');
+    dbClient = await dbConnection.connect(); // Connect to data store
+    serviceHelper.log('trace', 'Get battery data from data store');
+    tempResults = await dbClient.query(SQL);
     serviceHelper.log(
       'trace',
       'Release the data store connection back to the pool',
     );
     await dbClient.release(); // Return data store connection back to pool
     await dbClient.end(); // Close data store connection
-    // If no data create empty rows array
-    if (results.rowCount === 0) {
-      results.rows = [];
-    }
+    if (tempResults.rowCount !== 0) results.push(tempResults.rows);
 
     // Link-tap device
     serviceHelper.log('trace', 'Link-tap device');
@@ -141,20 +153,17 @@ exports.getData = async () => {
         location: 'Garden',
         device: 'LinkTap',
       };
-      results.rows.push(linkTapBatteryData);
-      results.rowCount = 1;
+      results.push(linkTapBatteryData);
     }
 
-    if (results.rowCount === 0) {
+    if (results.length === 0) {
       serviceHelper.log('warn', 'No battery data in the last hour');
       processData('No 🔋data in the last hour');
       return;
     }
     // Filter out ok battery readings
     serviceHelper.log('trace', 'Filtering out ok battery readings');
-    const lowBattery = results.rows.filter(
-      (rec) => rec.battery < minBatteryLevel,
-    );
+    const lowBattery = results.filter((rec) => rec.battery < minBatteryLevel);
 
     let message = '🔋levels low:\r\n';
     lowBattery.map((device) => {
