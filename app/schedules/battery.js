@@ -99,14 +99,28 @@ exports.getData = async () => {
     const minBatteryLevel = 15;
     const results = [];
 
-    // Flower Care battery info
-    serviceHelper.log('trace', 'Flower Care battery info');
+    // Arlo battery info
+    serviceHelper.log('trace', 'Arlo battery info');
     const SQL = 'SELECT battery, location, device FROM vw_battery_data';
     serviceHelper.log('trace', 'Connect to data store connection pool');
-    let dbConnection = await serviceHelper.connectToDB('flowercare');
+    let dbConnection = await serviceHelper.connectToDB('arlo');
     let dbClient = await dbConnection.connect(); // Connect to data store
     serviceHelper.log('trace', 'Get battery data from data store');
     let tempResults = await dbClient.query(SQL);
+    serviceHelper.log(
+      'trace',
+      'Release the data store connection back to the pool',
+    );
+    await dbClient.release(); // Return data store connection back to pool
+    if (tempResults.rowCount !== 0) results.push(tempResults.rows);
+
+    // Flower Care battery info
+    serviceHelper.log('trace', 'Flower Care battery info');
+    serviceHelper.log('trace', 'Connect to data store connection pool');
+    dbConnection = await serviceHelper.connectToDB('flowercare');
+    dbClient = await dbConnection.connect(); // Connect to data store
+    serviceHelper.log('trace', 'Get battery data from data store');
+    tempResults = await dbClient.query(SQL);
     serviceHelper.log(
       'trace',
       'Release the data store connection back to the pool',
