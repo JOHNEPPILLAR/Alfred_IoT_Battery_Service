@@ -16,7 +16,7 @@
     "alfred-helper": "git://github.com/johneppillar/alfred_helper_lib",
     "apn": "^2.2.0",
     "dotenv": "^8.2.0",
-    "pure-uuid": "^1.5.8",
+    "pure-uuid": "^1.6.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
     "restify": "^8.5.1",
