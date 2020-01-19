@@ -44,7 +44,6 @@ async function processData(message) {
       'trace',
       'Release the data store connection back to the pool',
     );
-    await dbClient.release(); // Return data store connection back to pool
     await dbClient.end(); // Close data store connection
 
     if (results.rowCount === 0) {
@@ -111,7 +110,7 @@ exports.getData = async () => {
       'trace',
       'Release the data store connection back to the pool',
     );
-    await dbClient.release(); // Return data store connection back to pool
+    dbClient.end();
     if (tempResults.rowCount !== 0) results.push(tempResults.rows);
 
     // Flower Care battery info
@@ -125,7 +124,7 @@ exports.getData = async () => {
       'trace',
       'Release the data store connection back to the pool',
     );
-    await dbClient.release(); // Return data store connection back to pool
+    await dbClient.end(); // Return data store connection back to pool
     if (tempResults.rowCount !== 0) results.push(tempResults.rows);
 
     // Netatmo battery info
@@ -139,7 +138,6 @@ exports.getData = async () => {
       'trace',
       'Release the data store connection back to the pool',
     );
-    await dbClient.release(); // Return data store connection back to pool
     await dbClient.end(); // Close data store connection
     if (tempResults.rowCount !== 0) results.push(tempResults.rows);
 
