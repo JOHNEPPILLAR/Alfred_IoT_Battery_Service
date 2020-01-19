@@ -103,42 +103,39 @@ exports.getData = async () => {
     const SQL = 'SELECT battery, location, device FROM vw_battery_data';
     serviceHelper.log('trace', 'Connect to data store connection pool');
     let dbConnection = await serviceHelper.connectToDB('arlo');
-    let dbClient = await dbConnection.connect(); // Connect to data store
     serviceHelper.log('trace', 'Get battery data from data store');
-    let tempResults = await dbClient.query(SQL);
+    let tempResults = await dbConnection.query(SQL);
     serviceHelper.log(
       'trace',
       'Release the data store connection back to the pool',
     );
-    dbClient.end();
+    dbConnection.end();
     if (tempResults.rowCount !== 0) results.push(tempResults.rows);
 
     // Flower Care battery info
     serviceHelper.log('trace', 'Flower Care battery info');
     serviceHelper.log('trace', 'Connect to data store connection pool');
     dbConnection = await serviceHelper.connectToDB('flowercare');
-    dbClient = await dbConnection.connect(); // Connect to data store
     serviceHelper.log('trace', 'Get battery data from data store');
-    tempResults = await dbClient.query(SQL);
+    tempResults = await dbConnection.query(SQL);
     serviceHelper.log(
       'trace',
       'Release the data store connection back to the pool',
     );
-    await dbClient.end(); // Return data store connection back to pool
+    await dbConnection.end(); // Return data store connection back to pool
     if (tempResults.rowCount !== 0) results.push(tempResults.rows);
 
     // Netatmo battery info
     serviceHelper.log('trace', 'Netatmo battery info');
     serviceHelper.log('trace', 'Connect to data store connection pool');
     dbConnection = await serviceHelper.connectToDB('netatmo');
-    dbClient = await dbConnection.connect(); // Connect to data store
     serviceHelper.log('trace', 'Get battery data from data store');
-    tempResults = await dbClient.query(SQL);
+    tempResults = await dbConnection.query(SQL);
     serviceHelper.log(
       'trace',
       'Release the data store connection back to the pool',
     );
-    await dbClient.end(); // Close data store connection
+    await dbConnection.end(); // Close data store connection
     if (tempResults.rowCount !== 0) results.push(tempResults.rows);
 
     // Link-tap device
