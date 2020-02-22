@@ -3,6 +3,7 @@
  */
 const scheduler = require('node-schedule');
 const serviceHelper = require('alfred-helper');
+const dateformat = require('dateformat');
 
 /**
  * Import helper libraries
@@ -10,61 +11,38 @@ const serviceHelper = require('alfred-helper');
 const batteryCheck = require('./battery.js');
 
 async function collectData() {
-  // Cancel any existing schedules
-  serviceHelper.log(
-    'trace',
-    'Removing any existing schedules and light/light group names',
-  );
-  await global.schedules.map((value) => value.cancel());
-
-  let rule = new scheduler.RecurrenceRule();
-  // Set first schedule
-  rule.hour = 7;
-  rule.minute = 0;
-  let schedule = scheduler.scheduleJob(rule, () => batteryCheck.getData()); // Set the timer
+  const date = new Date();
+  date.setHours(18);
+  date.setMinutes(0);
+  const schedule = scheduler.scheduleJob(date, () => batteryCheck.getData()); // Set the schedule
   global.schedules.push(schedule);
   serviceHelper.log(
     'info',
-    `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(
-      rule.minute,
-      2,
-    )}`,
-  );
-
-  // Set second schedule
-  rule = new scheduler.RecurrenceRule();
-  rule.hour = 18;
-  rule.minute = 0;
-  schedule = scheduler.scheduleJob(rule, () => batteryCheck.getData()); // Set the timer
-  global.schedules.push(schedule);
-  serviceHelper.log(
-    'info',
-    `Battery check scheduled for ${rule.hour}:${serviceHelper.zeroFill(
-      rule.minute,
-      2,
-    )}`,
+    `Battery check scheduled for ${dateformat(date, 'dd-mm-yyyy @ HH:MM')}`,
   );
 }
 
 // Set up the schedules
-exports.setSchedule = async () => {
-  await collectData();
+async function setSchedule() {
+  // Cancel any existing schedules
+  serviceHelper.log(
+    'trace',
+    'Removing any existing schedules',
+  );
+  await global.schedules.map((value) => value.cancel());
 
   // Set schedules each day to keep in sync with sunrise & sunset changes
-  const rule = new scheduler.RecurrenceRule();
-  rule.hour = 3;
-  rule.minute = 5;
-  const schedule = scheduler.scheduleJob(rule, () => {
-    serviceHelper.log('info', 'Resetting daily schedules to keep in sync with sunrise & sunset changes');
-    collectData();
-  }); // Set the schedule
+  const date = new Date();
+  date.setHours(3);
+  date.setMinutes(5);
+  date.setTime(date.getTime() + 1 * 86400000);
+  const schedule = scheduler.scheduleJob(date, () => collectData()); // Set the schedule
   global.schedules.push(schedule);
-
   serviceHelper.log(
     'info',
-    `Reset schedules will run at: ${serviceHelper.zeroFill(
-      rule.hour,
-      2,
-    )}:${serviceHelper.zeroFill(rule.minute, 2)}`,
+    `Reset schedules will run on ${dateformat(date, 'dd-mm-yyyy @ HH:MM')}`,
   );
-};
+  await collectData();
+}
+
+exports.setSchedule = setSchedule;
