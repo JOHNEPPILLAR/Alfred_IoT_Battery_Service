@@ -32,16 +32,11 @@ async function setSchedule() {
   await global.schedules.map((value) => value.cancel());
 
   // Set schedules each day to keep in sync with sunrise & sunset changes
-  const date = new Date();
-  date.setHours(3);
-  date.setMinutes(5);
-  date.setTime(date.getTime() + 1 * 86400000);
-  const schedule = scheduler.scheduleJob(date, () => collectData()); // Set the schedule
+  const rule = new scheduler.RecurrenceRule();
+  rule.hour = 3;
+  rule.minute = 5;
+  const schedule = scheduler.scheduleJob(rule, () => collectData()); // Set the schedule
   global.schedules.push(schedule);
-  serviceHelper.log(
-    'info',
-    `Reset schedules will run on ${dateformat(date, 'dd-mm-yyyy @ HH:MM')}`,
-  );
   await collectData();
 }
 
