@@ -14,9 +14,7 @@
   },
   "dependencies": {
     "alfred-helper": "git://github.com/johneppillar/alfred_helper_lib",
-    "apn": "^2.2.0",
     "dotenv": "^8.2.0",
-    "pure-uuid": "^1.6.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "restify": "^8.5.1",
@@ -24,11 +22,11 @@
     "node-schedule": "^1.3.2",
     "path": "^0.12.7",
     "dateformat": "^3.0.3",
-    "snyk": "^1.323.2"
+    "snyk": "^1.342.2"
   },
   "devDependencies": {
-    "eslint": "^7.0.0",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2"
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.21.2"
   }
 }
