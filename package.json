@@ -13,8 +13,7 @@
     "alfred-base": "git://github.com/johneppillar/alfred_base_service",
     "alfred-helper": "git://github.com/johneppillar/alfred_helper",
     "debug": "4.3.1",
-    "dotenv": "^8.2.0",
-    "moment": "^2.29.1"
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
